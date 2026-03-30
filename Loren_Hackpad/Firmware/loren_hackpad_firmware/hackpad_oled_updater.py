@@ -1,54 +1,28 @@
-#!/usr/bin/env python3
-"""
-Lorenzo's Hackpad — Aggiornamento OLED
-Invia ora, data e meteo alla tastiera ogni minuto tramite RAW HID.
-
-INSTALLAZIONE:
-    pip install hid requests
-
-CONFIGURAZIONE:
-    1. Registrati gratis su https://openweathermap.org/api
-    2. Ottieni la tua API key gratuita
-    3. Inseriscila in API_KEY qui sotto
-    4. Imposta la tua città in CITY
-"""
+# for privacy reasons I won't fill some gaps (such as my city), so you will have to put yours in
 
 import hid
 import time
 import datetime
 import requests
 import sys
+API_KEY = "Insert_API_KEY"   
+CITY    = "Rome,IT"                          
+UPDATE_INTERVAL = 1800                         # ogni ora
 
-# ─────────────────────────────────────────────
-#  CONFIGURAZIONE — Modifica questi valori
-# ─────────────────────────────────────────────
-API_KEY = "INSERISCI_QUI_LA_TUA_API_KEY"   # Da openweathermap.org (gratuita)
-CITY    = "Rome,IT"                          # La tua città
-UPDATE_INTERVAL = 60                         # Secondi tra un aggiornamento e l'altro
-
-# VID/PID dello XIAO RP2040 con QMK (da info.json)
 KEYBOARD_VID = 0x4C52
 KEYBOARD_PID = 0x0001
 
-# ─────────────────────────────────────────────
-#  MAPPA CODICI METEO → numero per il firmware
-# ─────────────────────────────────────────────
+
 # 0=sole 1=nuvola 2=pioggia 3=neve 4=temporale 5=nebbia
 def weather_code(owm_id):
-    """Converte il codice meteo OpenWeatherMap nel codice per il firmware."""
-    if owm_id in range(200, 300): return 4  # Temporale
-    if owm_id in range(300, 600): return 2  # Pioggia/Drizzle
-    if owm_id in range(600, 700): return 3  # Neve
-    if owm_id in range(700, 800): return 5  # Nebbia/Bruma
-    if owm_id == 800:             return 0  # Cielo sereno
-    if owm_id in range(801, 900): return 1  # Nuvoloso
+    if owm_id in range(200, 300): return 4  
+    if owm_id in range(300, 600): return 2 
+    if owm_id in range(600, 700): return 3  
+    if owm_id in range(700, 800): return 5 
+    if owm_id == 800:             return 0  
+    if owm_id in range(801, 900): return 1  
     return 0
-
-# ─────────────────────────────────────────────
-#  FUNZIONI
-# ─────────────────────────────────────────────
 def get_weather():
-    """Scarica il meteo attuale da OpenWeatherMap."""
     try:
         url = f"https://api.openweathermap.org/data/2.5/weather?q={CITY}&appid={API_KEY}&units=metric"
         r = requests.get(url, timeout=10)
@@ -61,11 +35,10 @@ def get_weather():
         print(f"  Meteo: {desc} ({temp}°C) → codice {code}")
         return code
     except Exception as e:
-        print(f"  ⚠️  Errore meteo: {e} — uso sole come default")
+        print(f"  ⚠️  errore: {e} — uso sole come default")
         return 0
 
 def find_keyboard():
-    """Trova la tastiera tra i dispositivi HID connessi."""
     for device in hid.enumerate():
         if device["vendor_id"] == KEYBOARD_VID and device["product_id"] == KEYBOARD_PID:
             if device["usage_page"] == 0xFF60 and device["usage"] == 0x61:
@@ -81,8 +54,8 @@ def send_to_keyboard(path, time_str, date_str, weather):
       [9..18]= data "DD/MM/YYYY"
       [19]   = codice meteo
     """
-    packet = [0x00] * 33  # 33 byte: il primo è il report ID (0x00)
-    packet[1]  = 0x01     # Comando
+    packet = [0x00] * 33  
+    packet[1]  = 0x01     
     for i, c in enumerate(time_str[:8]):
         packet[2 + i] = ord(c)
     for i, c in enumerate(date_str[:10]):
@@ -96,22 +69,13 @@ def send_to_keyboard(path, time_str, date_str, weather):
         device.close()
         return True
     except Exception as e:
-        print(f"  ⚠️  Errore invio HID: {e}")
+        print(f"  ⚠️  errore invio HID: {e}")
         return False
 
-# ─────────────────────────────────────────────
-#  LOOP PRINCIPALE
-# ─────────────────────────────────────────────
+
 def main():
     print("Lorenzo's Hackpad — Aggiornamento OLED")
     print("=" * 40)
-
-    if API_KEY == "INSERISCI_QUI_LA_TUA_API_KEY":
-        print("⚠️  ATTENZIONE: Devi inserire la tua API key OpenWeatherMap!")
-        print("   Registrati gratis su https://openweathermap.org/api")
-        print("   Poi modifica la variabile API_KEY in questo script.")
-        sys.exit(1)
-
     current_weather = 0
     weather_last_update = 0
 
@@ -121,14 +85,11 @@ def main():
         now  = datetime.datetime.now()
         time_str = now.strftime("%H:%M:%S")
         date_str = now.strftime("%d/%m/%Y")
-
-        # Aggiorna meteo ogni 10 minuti
+# ogni 10 min
         if time.time() - weather_last_update > 600:
             print(f"\n[{time_str}] Aggiornamento meteo...")
             current_weather = get_weather()
             weather_last_update = time.time()
-
-        # Trova e invia alla tastiera
         path = find_keyboard()
         if path:
             ok = send_to_keyboard(path, time_str, date_str, current_weather)
