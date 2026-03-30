@@ -14,9 +14,21 @@ I wanted to assign to this numpad a series of shortcuts(such as spotify and stea
 
 
 BOA:
+
+
 -1 Seed xiao rp2040
+
+
 -9 through-hole 1N4148 Diodes
+
+
 -1  EC11 Rotary encoder
+
+
 -1 0.91 inch OLED display
+
+
 -2 SK6812 MINI-E LEDs
+
+
 -4 M3x12mm screws
