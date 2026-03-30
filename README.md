@@ -9,6 +9,10 @@ after that I realized the case
 as you can see I went for a bit of particular one, since I wanted it to be as minimalistic as possible.
 and after a bit of code that you can find in the firmware folder this should be the final results<img width="1153" height="997" alt="Screenshot 2026-03-30 162639" src="https://github.com/user-attachments/assets/ef133a39-f92e-4f17-b594-35bb389aa413" />
 I wanted to assign to this numpad a series of shortcuts(such as spotify and steam);as for the knob I wanted to use it for the volume and finally the display should show the date, day and time.
+
+
+
+
 BOA:
 -1 Seed xiao rp2040
 -9 through-hole 1N4148 Diodes
