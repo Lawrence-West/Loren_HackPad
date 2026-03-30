@@ -1,5 +1,5 @@
 # Loren_HackPad
-Hi LorenHackPad is 3x3 macropad with a rotary encoder, an OLED display and two LEDs.
+Hi LorenHackPad is 3x3 macropad with a rotary encoder, an OLED display and two status LEDs.
 
 
 I First started by building the schematics
